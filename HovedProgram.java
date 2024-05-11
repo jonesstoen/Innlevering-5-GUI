@@ -88,7 +88,9 @@ public class HovedProgram{
         spillPanel.setLayout(new GridLayout(verden.nyttrutenett.hentAntrader(), verden.nyttrutenett.hentAntkolonner()));
         //så må vi legge til JButtons fordi vi skal kunne interagere med spillbrettet. 
         for ( int rad = 0; rad< verden.nyttrutenett.hentAntrader(); rad++){
+
             for (int kol = 0; kol<verden.nyttrutenett.hentAntkolonner(); kol++){
+
                 Celle celle = verden.nyttrutenett.hentRutene(rad,kol);
                 JButton celleKnapp = new JButton(celle.hentStatusTegn()+"");
                 if( celle.erLevende()==true){
@@ -97,8 +99,15 @@ public class HovedProgram{
                 
                 //må lage en action listener for celleKnapp
                 class celleKnappBehandler implements ActionListener {
+                    private JLabel levendeTeller;
+                    //har levendetelleren som parameter slik at vi kan oppdatere telleren når vi endrer status på cellene.
+                    public celleKnappBehandler(JLabel levendeTeller){
+                        this.levendeTeller= levendeTeller;
+                    }
                     @Override
                     public void actionPerformed(ActionEvent e){
+
+                        JButton celleKnapp =(JButton) e.getSource();//henter knappen som ble trykket på
                         if( celle.erLevende()==true){
                             celle.settDoed();
                             celleKnapp.setText(celle.hentStatusTegn()+"");
@@ -110,33 +119,44 @@ public class HovedProgram{
                             celle.settLevende();
                             celleKnapp.setText(celle.hentStatusTegn()+"");
                             celleKnapp.setBackground(Color.GREEN);
+                            
                         }
+                        levendeTeller.setText("Antall Levende: " + verden.nyttrutenett.antallLevende());//oppdaterer telleren
                     }
 
                 }
 
-                celleKnapp.addActionListener(new celleKnappBehandler());
+                celleKnapp.addActionListener(new celleKnappBehandler(levendeTeller));//legger til actionlistener
                 spillPanel.add(celleKnapp);
 
             }
 
         }
+        //legger til knapper for å starte og avslutte simuleringen
         JButton startSimulering = new JButton("START");
         JButton avsluttSimulering = new JButton("AVSLUTT");
+        class AvsluttSimuleringBehandler implements ActionListener{
+            @Override
+            public void actionPerformed(ActionEvent e){
+                System.exit(0);
+            }
+        }
+        avsluttSimulering.addActionListener(new AvsluttSimuleringBehandler());
 
 
+        
         toppMeny.add(startSimulering);
         toppMeny.add(avsluttSimulering);
         
+        
+        hovedPanel.add(toppMeny,BorderLayout.NORTH);//legger til toppmenyen
+        vindu.remove(panel);//fjerner velkomstpanelet
+        hovedPanel.add(spillPanel, BorderLayout.CENTER);//legger til spillpanelet
 
-        hovedPanel.add(toppMeny,BorderLayout.NORTH);
-        vindu.remove(panel);
-        hovedPanel.add(spillPanel, BorderLayout.CENTER);
-
-        vindu.add(hovedPanel);
+        vindu.add(hovedPanel);//legger til hovedpanelet
        
-        vindu.validate();
-        vindu.pack();
+        vindu.validate();//oppdaterer vinduet
+        vindu.pack();//pakker vinduet
         
         
 
