@@ -13,34 +13,45 @@ public class HovedProgram{
     
     }catch (Exception e ){System.exit(1);}
 
-    vindu = new JFrame(" GAME OF LIFE GUI ");
+    vindu = new JFrame(" GAME OF LIFE GUI ");//oppretter et vindu
     vindu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    JPanel velkommen = velkomstpanel();
+    vindu.setBackground(Color.BLUE);
+    JPanel velkommen = velkomstpanel();//oppretter et panel
     vindu.setLocationRelativeTo(null);
     vindu.add(velkommen);
-    
-    
-
     vindu.pack();
     vindu.setVisible(true);
-
-   
-
-
-
     }
-    private static JPanel velkomstpanel(){
+    
+    private static JPanel velkomstpanel(){//oppretter velkomstpanel som skal vises før spillet starter
         JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));//formaterer panelet
 
-        JLabel velkommen = new JLabel("Velkommen til GameOfLife");
+        JLabel velkommen = new JLabel("Velkommen til GameOfLife"); 
         panel.add(velkommen);
+        velkommen.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Legger til tekstfelter for å angi antall rader og kolonner
+        JLabel raderLabel = new JLabel("Antall rader:");
+        JTextField raderFelt = new JTextField(5);
+        JLabel kolonnerLabel = new JLabel("Antall kolonner:");
+        JTextField kolonnerFelt = new JTextField(5);
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(raderLabel);
+        inputPanel.add(raderFelt);
+        inputPanel.add(kolonnerLabel);
+        inputPanel.add(kolonnerFelt);
+        panel.add(inputPanel);//legger til inputpanel
+        JPanel knappPanel = new JPanel();
         JButton avslutttKnapp = new JButton("Avslutt");
-        JButton startKnapp = new JButton("Start Simuleringen");
+        JButton startKnapp = new JButton("Hent Spillbrettet");
         startKnapp.setBackground(Color.GREEN);
         avslutttKnapp.setBackground(Color.RED);
-
-        class AvsluttknappBehandler implements ActionListener{
+        knappPanel.add(startKnapp);
+        knappPanel.add(avslutttKnapp);
+        //oppretter actionlisteners for knappene
+        class AvsluttknappBehandler implements ActionListener{ 
             @Override
             public void actionPerformed(ActionEvent e ){
                 System.exit(0);
@@ -51,7 +62,15 @@ public class HovedProgram{
         class StartKnappbehandler implements ActionListener{
             @Override
             public void actionPerformed(ActionEvent e){
-                startSpill(panel);
+                try {
+                    // henter antall rader og kolonner fra tekstfeltene
+                    int antallRader = Integer.parseInt(raderFelt.getText());//
+                    int antallKolonner = Integer.parseInt(kolonnerFelt.getText());
+                    startSpill(panel, antallRader, antallKolonner);
+                } catch (NumberFormatException error) {
+                    // viser feilmelding hvis brukeren skriver inn noe annet enn heltall
+                    JOptionPane.showMessageDialog(vindu, "Kun Heltall Tilatt", "Feil", JOptionPane.ERROR_MESSAGE);
+                }
 
             }
         }
@@ -61,31 +80,25 @@ public class HovedProgram{
         avslutttKnapp.addActionListener(new AvsluttknappBehandler());
 
         //legg knapper på panel
-        panel.add(startKnapp);
-        panel.add(avslutttKnapp);
+        panel.add(knappPanel);
 
         return panel;
 
     }
-    
-    private static void startSpill(JPanel panel){
-    
-
-       
-
-        
-        Verden verden = new Verden (10,10);
+    //metode for å starte spillet og simuleringen
+    private static void startSpill(JPanel panel, int antallRader, int antallKolonner){
+        Verden verden = new Verden (antallRader, antallKolonner);
         verden.tegn();
 
         JPanel hovedPanel = new JPanel(new BorderLayout());
-
+        
         JPanel spillPanel = new JPanel();
         JPanel toppMeny = new JPanel();
         toppMeny.setLayout(new FlowLayout(FlowLayout.CENTER));
-
+        //vi må ha en teller for å vise antall levende celler
         JLabel levendeTeller = new JLabel("Antall Levende: "+ verden.nyttrutenett.antallLevende());
         toppMeny.add(levendeTeller);
-
+        //oppretter et spillpanel som skal inneholde cellene
         spillPanel.setLayout(new GridLayout(verden.nyttrutenett.hentAntrader(), verden.nyttrutenett.hentAntkolonner()));
         //så må vi legge til JButtons fordi vi skal kunne interagere med spillbrettet. 
         for ( int rad = 0; rad< verden.nyttrutenett.hentAntrader(); rad++){
@@ -96,7 +109,7 @@ public class HovedProgram{
                 JButton celleKnapp = new JButton(celle.hentStatusTegn()+"");
                 if( celle.erLevende()==true){
                     celleKnapp.setBackground(Color.GREEN);
-                }else{ celleKnapp.setBackground(Color.RED);}
+                }else{ celleKnapp.setBackground(Color.BLACK);}
                 
                 //må lage en action listener for celleKnapp
                 class celleKnappBehandler implements ActionListener {
@@ -112,7 +125,7 @@ public class HovedProgram{
                         if( celle.erLevende()==true){
                             celle.settDoed();
                             celleKnapp.setText(celle.hentStatusTegn()+"");
-                            celleKnapp.setBackground(Color.RED);
+                            celleKnapp.setBackground(Color.BLACK);
                             
 
                         }
@@ -145,8 +158,9 @@ public class HovedProgram{
         avsluttSimulering.addActionListener(new AvsluttSimuleringBehandler());
         class StartSimuleringBehandler implements ActionListener{
             
-            
+            //metode for å oppdatere spillet
             public void oppdaterspill(){
+                //fjerner alle knappene fra spillpanelet og oppdaterer før vi legger inn nye celler
                  spillPanel.removeAll();
 
 
@@ -159,7 +173,7 @@ public class HovedProgram{
                         JButton celleKnapp = new JButton(celle.hentStatusTegn()+"");
                         if( celle.erLevende()==true){
                             celleKnapp.setBackground(Color.GREEN);
-                        }else{ celleKnapp.setBackground(Color.RED);}
+                        }else{ celleKnapp.setBackground(Color.BLACK);}
                         spillPanel.add(celleKnapp);
         
                     }
@@ -177,28 +191,23 @@ public class HovedProgram{
                 toppMeny.validate();
                 
                 
-
+                //oppretter en timer som skal oppdatere spillet hvert 2 sekund
                 timer = new Timer(2000, new ActionListener(){
+                    //oppdatering skal kjøres hvert 2 sekund
                     @Override
                     public void actionPerformed(ActionEvent e){
                         oppdaterspill();
                         
                     }
                 });
+                
                 timer.start();
 
 
             }
         }
+        //legger til actionlistener for startSimulering
         startSimulering.addActionListener(new StartSimuleringBehandler());
-        
-        
-
-
-        
-        
-
-
         
         toppMeny.add(startSimulering);
         toppMeny.add(avsluttSimulering);
