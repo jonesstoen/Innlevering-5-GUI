@@ -1,10 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;
-import java.util.ArrayList;
+
 public class HovedProgram{
     private static JFrame vindu;
+    private static Timer timer;
+    
      
     public static void main(String[]args){
         try {
@@ -68,11 +69,11 @@ public class HovedProgram{
     }
     
     private static void startSpill(JPanel panel){
-        //TODO: starte spillet
+    
 
        
 
-        //TODO: lage spill verden
+        
         Verden verden = new Verden (10,10);
         verden.tegn();
 
@@ -142,6 +143,60 @@ public class HovedProgram{
             }
         }
         avsluttSimulering.addActionListener(new AvsluttSimuleringBehandler());
+        class StartSimuleringBehandler implements ActionListener{
+            
+            
+            public void oppdaterspill(){
+                 spillPanel.removeAll();
+
+
+                verden.oppdatering();
+                for (int rad = 0; rad< verden.nyttrutenett.hentAntrader(); rad++){
+
+                    for (int kol = 0; kol<verden.nyttrutenett.hentAntkolonner(); kol++){
+        
+                        Celle celle = verden.nyttrutenett.hentRutene(rad,kol);
+                        JButton celleKnapp = new JButton(celle.hentStatusTegn()+"");
+                        if( celle.erLevende()==true){
+                            celleKnapp.setBackground(Color.GREEN);
+                        }else{ celleKnapp.setBackground(Color.RED);}
+                        spillPanel.add(celleKnapp);
+        
+                    }
+        
+                }
+                levendeTeller.setText("Antall Levende: " + verden.nyttrutenett.antallLevende());
+                spillPanel.validate();
+                spillPanel.repaint();
+                
+            }
+            @Override
+            public void actionPerformed(ActionEvent e){
+                //fjerner start knappen når den er trykket på.
+                toppMeny.remove(startSimulering);
+                toppMeny.validate();
+                
+                
+
+                timer = new Timer(2000, new ActionListener(){
+                    @Override
+                    public void actionPerformed(ActionEvent e){
+                        oppdaterspill();
+                        
+                    }
+                });
+                timer.start();
+
+
+            }
+        }
+        startSimulering.addActionListener(new StartSimuleringBehandler());
+        
+        
+
+
+        
+        
 
 
         
@@ -161,6 +216,8 @@ public class HovedProgram{
         
 
     }
+    
+    
 
     
   
